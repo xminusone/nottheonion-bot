@@ -1,5 +1,5 @@
 # -------------------------------------------- #
-# NotTheOnionBot 2.0b                          #
+# NotTheOnionBot 2.1b                          #
 # By /u/x_minus_one                            #
 # https://github.com/xminusone/nottheonion-bot #
 # -------------------------------------------- #
@@ -15,30 +15,20 @@ import datetime
 import urllib.request
 import warnings
 import sys
-# import OAuth2Util
+import OAuth2Util
 from bs4 import BeautifulSoup
 
 # I hate seeing that red stuff from BeautifulSoup that isn't my fault.
 warnings.filterwarnings("ignore")
 
 # Startup Console Text
-print('NotTheOnionBot is starting up - v2.0 beta')
+print('NotTheOnionBot is starting up - v2.1 beta')
 print('Sadly, this is NotTheOnionBot.')
 print(' ')
 
-# Reddit Account Login
-username = "NotTheOnionBot"
-password = "NICE TRY, DODONGO!"
-
-reddit = praw.Reddit(user_agent="NotTheOnionBot - TitleCheckBot + DeadPostsBot - v2.0 beta by /u/x_minus_one")
+r = praw.Reddit(user_agent="NotTheOnionBot - TitleCheckBot + DeadPostsBot - v2.1 beta by /u/x_minus_one")
 print('Logging in to reddit...')
-try:
-    reddit.login(username, password)
-except:
-    print("Login failed!  Can't complete startup.  Is Reddit down?  Probably, or the username/pasword is incorrect.")
-    printCurrentTime()
-    time.sleep(30)
-    sys.exit(0)
+o = OAuth2Util.OAuth2Util(r)
 print("Done!")
 
 # Submission Limit for TitleCheckBot
@@ -97,7 +87,7 @@ print(' ')
 # SHARED INFO #
 # (this should be set to "mod" unless you don't want the main sub checked
 #  for testing reasons)
-rmod = reddit.get_subreddit("mod")
+rmod = r.get_subreddit("mod")
 
 # TITLECHECKBOT #
 
