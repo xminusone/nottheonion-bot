@@ -28,7 +28,8 @@ print(' ')
 
 r = praw.Reddit(user_agent="NotTheOnionBot - TitleCheckBot + DeadPostsBot - v2.1 beta by /u/x_minus_one")
 print('Logging in to reddit...')
-o = OAuth2Util.OAuth2Util(r)
+o = OAuth2Util.OAuth2Util(r, print_log=True)
+o.refresh()
 print("Done!")
 
 # Submission Limit for TitleCheckBot
@@ -173,6 +174,7 @@ def deadPostsBot():
 
 while True:
   try:
+    o.refresh()
     titleCheckBot()
     print('TitleCheckBot cycle completed.')
     print(' ')
