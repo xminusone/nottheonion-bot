@@ -158,7 +158,7 @@ def deadPostsBot():
             if len(submission.mod_reports + submission.user_reports) > 0: # Skips reported posts (mod or user)
                 print('Submission has reports, continuing. (', submission.author.name, ')')
                 continue
-            if len(submission.score) > 50: # Skips posts with high enough karma scores to matter in the subreddit
+            if submission.score > 50: # Skips posts with high enough karma scores to matter in the subreddit
                 print('Submission is significantly upvoted (', submission.score, '), continuing. (', submission.author.name, ')')
                 #report is unnecessary due to karmatrainbot
                 #submission.report(reason='Submission is at +100 and is unapproved. Please review ASAP.')
