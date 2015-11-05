@@ -18,6 +18,7 @@ import sys
 import OAuth2Util
 from bs4 import BeautifulSoup
 import traceback
+from unidecode import unidecode
 
 # I hate seeing that red stuff from BeautifulSoup that isn't my fault.
 warnings.filterwarnings("ignore")
@@ -115,7 +116,8 @@ def getArticleText(url):
         try:
             page = urllib.request.urlopen(url).read()
             soup = BeautifulSoup(page)
-            return str(soup)
+            cleanarticle = unidecode(soup)
+            return str(cleanarticle)
         except:
             traceback.print_exc()
             print('Whoops!  Checking this article text didnt work.  Skipping submission.')
@@ -126,7 +128,7 @@ def titleCheckBot():
     print('Starting TitleCheckBot cycle.')
     printCurrentTime()
     for submission in rmod.get_unmoderated(limit=titles_limit):
-        title = submission.title
+        title = unidecode(submission.title)
         articletext = getArticleText(submission.url)
         exemptcheckurl = submission.url
         try:
