@@ -1,5 +1,5 @@
 # -------------------------------------------- #
-# NotTheOnionBot 2.3b                          #
+# NotTheOnionBot 2.5b                          #
 # By /u/x_minus_one                            #
 # https://github.com/xminusone/nottheonion-bot #
 # -------------------------------------------- #
@@ -17,16 +17,17 @@ import warnings
 import sys
 import OAuth2Util
 from bs4 import BeautifulSoup
+import traceback
 
 # I hate seeing that red stuff from BeautifulSoup that isn't my fault.
 warnings.filterwarnings("ignore")
 
 # Startup Console Text
-print('NotTheOnionBot is starting up - v2.3 beta')
+print('NotTheOnionBot is starting up - v2.4 beta')
 print('Sadly, this is NotTheOnionBot.')
 print(' ')
 
-r = praw.Reddit(user_agent="NotTheOnionBot v2.3 beta by /u/x_minus_one")
+r = praw.Reddit(user_agent="NotTheOnionBot v2.4 beta by /u/x_minus_one")
 print('Logging in to reddit...')
 o = OAuth2Util.OAuth2Util(r, print_log=True)
 o.refresh()
@@ -93,6 +94,11 @@ print(' ')
 #  for testing reasons)
 rmod = r.get_subreddit("mod")
 
+# Karma score considered "significant" for approval purposes
+# Should be set to one less than the real score because of using greater than
+
+IgnoreUpvotedScore = 99
+
 # TITLECHECKBOT #
 
 # Article Text Grabber/Valid URL Checker
@@ -101,18 +107,23 @@ def URLisValid(url):
         urllib.request.urlopen(url)
         return True
     except:
+        traceback.print_exc()
         print("Flagrant System Error! URL failed to load. Can't check this submission.")
         return False
 def getArticleText(url):
     if URLisValid(url):
-        page = urllib.request.urlopen(url).read()
-        soup = BeautifulSoup(page)
-        return str(soup)
+        try:
+            page = urllib.request.urlopen(url).read()
+            soup = BeautifulSoup(page)
+            return str(soup)
+        except:
+            traceback.print_exc()
+            print('Whoops!  Checking this article text didnt work.  Skipping submission.')
+            pass
 
 # Reddit Submission Checks
 def titleCheckBot():
     print('Starting TitleCheckBot cycle.')
-    o.refresh()
     printCurrentTime()
     for submission in rmod.get_unmoderated(limit=titles_limit):
         title = submission.title
@@ -123,28 +134,31 @@ def titleCheckBot():
                 # Check against domain exemption list
                 if any(domain in exemptcheckurl for domain in exemptlist):
                     print('Domain is on exemption list. Cannot check this submission. (', submission.author.name, ') ')
+                    continue
                 # Check if title is in article
                 elif title.lower() in articletext.lower():
                     print('Submission has the correct title. (', submission.author.name, ') ')
                 # Reports for submissions, with wrong titles, that are at greater than +50- this is important when recovering from a downtime so we don't accidentally pull from /r/all or something!
-                elif submission.score > 50:
+                elif submission.score > IgnoreUpvotedScore:
                     print('Submission has wrong title, but has more than 50 upvotes. Reporting...')
-                    submission.report(reason='Submission may have wrong title, but is at +50.')
+                    submission.report(reason='Submission may have wrong title, but is upvoted.  Please review.')
                     print('Reported submission. (', submission.author.name, ')')
                 # Removals for submissions that have the wrong title
                 else:
                     print('Submission has wrong title.  Removing and assigning flair...')
                     submission.remove()
                     submission.set_flair(flair_text='Wrong/Altered Title', flair_css_class='removed')
-                    print('Done! (', submission.author.name, ')')
+                    print('Done, commenting...')
+                    submission.add_comment(getRemovalComment()).distinguish()
+                    print('All done! (', submission.author.name, ')')
         except:
             print("Error! Reddit failed to grab a submission or the user deleted it during the cycle. Skipping...")
+            traceback.print_exc()
             pass
           
 # DEADPOSTSBOT #
 def deadPostsBot():
     print('Starting DeadPostsBot cycle.')
-    o.refresh()
     printCurrentTime()
     print('Updating current time...')
     now = datetime.datetime.now(datetime.timezone.utc).timestamp()
@@ -158,7 +172,7 @@ def deadPostsBot():
             if len(submission.mod_reports + submission.user_reports) > 0: # Skips reported posts (mod or user)
                 print('Submission has reports, continuing. (', submission.author.name, ')')
                 continue
-            if submission.score > 50: # Skips posts with high enough karma scores to matter in the subreddit
+            if submission.score > IgnoreUpvotedScore: # Skips posts with high enough karma scores to matter in the subreddit
                 print('Submission is significantly upvoted (', submission.score, '), continuing. (', submission.author.name, ')')
                 #report is unnecessary due to karmatrainbot
                 #submission.report(reason='Submission is at +100 and is unapproved. Please review ASAP.')
@@ -169,7 +183,8 @@ def deadPostsBot():
               print('Done! (', submission.author.name, ')')
         except:
             print("Error! Reddit failed to grab a submission or the user deleted it during the cycle. Skipping...")
-            continue
+            traceback.print_exc()
+            pass
 
         
 # KARMATRAINBOT #
@@ -182,18 +197,17 @@ def karmaTrainBot():
         if len(submission.mod_reports + submission.user_reports) > 0:
             print('Submission already mod reported, continuing. (', submission.author.name, ')')
             continue
-        if submission.score > 99:
+        if submission.score > IgnoreUpvotedScore:
             print('Submission is at +100, reporting. (', submission.author.name, ')')
-            submission.report(reason='Submission is at +100 and is unapproved. Please review.')
+            submission.report(reason='Submission reached +100 without being approved.  Please review')
             print('Done!')
-            time.sleep(3)
             continue
         else:
             print('Submission is not at +100, continuing. (', submission.author.name, ')')
-            continue
     except:
       print('Reddit gave us an error or the user deleted it during the cycle. Skipping...')
-      continue
+      traceback.print_exc()
+      pass
 
 # ---------------- #
 # CYCLE SUPERVISOR #
@@ -212,12 +226,18 @@ while True:
     print(' ')
     karmaTrainBot()
     print('KarmaTrainBot cycle completed.')
-    print('Waiting 5 minutes to run next cycle loop.')
-    print(' ')
-    cycleSleepTime = 300
-    time.sleep(float(cycleSleepTime))
-    print('Starting new cycle.')
+    print('All done, exiting.')
+    time.sleep(5)
+    os._exit(0)
+    #print('Waiting 5 minutes to run next cycle loop.')
+    #print(' ')
+    #cycleSleepTime = 300
+    #time.sleep(float(cycleSleepTime))
+    #print('Starting new cycle.')
   except:
     print('THANKS OBAMA!  There was an error.  Retrying cycle.')
+    traceback.print_exc()
     exceptionSleepTime = 10
     time.sleep(float(exceptionSleepTime))
+    pass
+
