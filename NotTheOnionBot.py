@@ -1,5 +1,5 @@
 # -------------------------------------------- #
-# NotTheOnionBot 2.5b                          #
+# NotTheOnionBot 3.0                          #
 # By /u/x_minus_one                            #
 # https://github.com/xminusone/nottheonion-bot #
 # -------------------------------------------- #
