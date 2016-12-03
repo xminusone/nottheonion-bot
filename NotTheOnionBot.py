@@ -1,5 +1,5 @@
 # -------------------------------------------- #
-# NotTheOnionBot 3.0.1                         #
+# NotTheOnionBot 3.0.2                         #
 # By /u/x_minus_one                            #
 # https://github.com/xminusone/nottheonion-bot #
 # -------------------------------------------- #
@@ -47,8 +47,20 @@ def printCurrentTime():
     currentSysTime = time.localtime()
     print(time.strftime('%m/%d/%y @ %H:%M:%S', currentSysTime))
     
-# Generates the timestamp that goes in reports so we can see how long
-# stuff was left in the modqueue.
+"""
+    # Generates Time in @beats (max 6 characters)
+    h, m, s = localtime()[3:6]
+    beats = ((h * 3600) + (m * 60) + s + timezone + 3600) / 86.4
+
+    if beats > 1000:
+        beats -= 1000
+    elif beats < 0:
+        beats += 1000
+
+    roundedSwatchTime = round(beats, 2)
+
+    return roundedSwatchTime
+"""
 def generateCycleTimeStamp():
     currentSysTime = time.localtime()
     roundedSwatchTime = time.strftime('%m/%d/%y @ %H:%M:%S', currentSysTime)
@@ -200,6 +212,7 @@ def karmaTrainBot():
   printCurrentTime()
   print('Grabbing time for reports...')
   cycleBeats = generateCycleTimeStamp()
+  print("DEBUG: It's @%s." % cycleBeats)
   print('Cycle started at %s' % cycleBeats)
   print('Grabbing unmoderated posts...')
   for submission in rmod.get_unmoderated(limit=alerts_limit):
@@ -225,7 +238,7 @@ def karmaTrainBot():
       pass
 
 # ---------------- #
-# CYCLE            #
+# CYCLE SUPERVISOR #
 # ---------------- #
 
 # "You're not my NotTheOnionBot supervisor!" -Cheryl Tunt
@@ -251,9 +264,8 @@ while True:
     #time.sleep(float(cycleSleepTime))
     #print('Starting new cycle.')
   except:
-    print('THANKS OBAMA!  There was an error.  Retrying cycle.')
+    print('Thanks, Trump!  There was an error.  Retrying cycle.')
     traceback.print_exc()
     exceptionSleepTime = 10
     time.sleep(float(exceptionSleepTime))
     pass
-
