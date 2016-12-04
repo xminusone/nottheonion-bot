@@ -1,5 +1,5 @@
 # -------------------------------------------- #
-# NotTheOnionBot 3.0.2                         #
+# NotTheOnionBot 4.0                           #
 # By /u/x_minus_one                            #
 # https://github.com/xminusone/nottheonion-bot #
 # -------------------------------------------- #
@@ -23,11 +23,11 @@ from time import localtime, timezone
 from unidecode import unidecode
 
 # Startup Console Text
-print('NotTheOnionBot is starting up - v3.0.1')
+print('NotTheOnionBot is starting up - v4.0')
 print('Sadly, this is NotTheOnionBot.')
 print(' ')
 
-r = praw.Reddit(user_agent="NotTheOnionBot v3.0.1 by /u/x_minus_one")
+r = praw.Reddit(user_agent="NotTheOnionBot v4.0 by /u/x_minus_one")
 print('Logging in to reddit...')
 o = OAuth2Util.OAuth2Util(r, print_log=True)
 o.refresh()
@@ -212,7 +212,7 @@ def deadPostsBot():
         
 # KARMATRAINBOT #
 def karmaTrainBot():
-  reportReason = 'Warning! This link hit +100 without being approved. Please review. (%s, v3.0.1)'
+  reportReason = 'Warning! This link hit +100 without being approved. Please review. (%s, v4.0)'
   print('Starting KarmaTrainBot cycle.')
   printCurrentTime()
   print('Grabbing time for reports...')
