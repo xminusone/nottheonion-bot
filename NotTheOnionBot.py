@@ -151,14 +151,14 @@ def titleCheckBot():
         try:
             if articletext is not None:
                 # Check against domain exemption list
-                if any(domain in exemptcheckurl for domain in exemptlist):
-                    print('Domain is on exemption list. Cannot check this submission. (', submission.author.name, ') ')
-                    continue
-                # Check if title is in article
                 try:
                     articletext = articletext.lower().decode('utf-8')
                 except UnicodeEncodeError:
                     articletext = articletext.lower()
+                if any(domain in exemptcheckurl for domain in exemptlist):
+                    print('Domain is on exemption list. Cannot check this submission. (', submission.author.name, ') ')
+                    continue
+                # Check if title is in article
                 elif title.lower() in unidecode(articletext):
                     print('Submission has the correct title. (', submission.author.name, ') ')
                 # Reports for submissions, with wrong titles, that are at greater than +50- this is important when recovering from a downtime so we don't accidentally pull from /r/all or something!
