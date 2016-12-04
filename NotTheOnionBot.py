@@ -151,10 +151,7 @@ def titleCheckBot():
         try:
             if articletext is not None:
                 # Check against domain exemption list
-                try:
-                    articletext = articletext.lower().decode('utf-8')
-                except UnicodeEncodeError:
-                    articletext = articletext.lower()
+                articletext = articletext.lower()
                 if any(domain in exemptcheckurl for domain in exemptlist):
                     print('Domain is on exemption list. Cannot check this submission. (', submission.author.name, ') ')
                     continue
