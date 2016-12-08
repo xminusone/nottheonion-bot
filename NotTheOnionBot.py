@@ -156,7 +156,7 @@ def titleCheckBot():
                     print('Domain is on exemption list. Cannot check this submission. (', submission.author.name, ') ')
                     continue
                 # Check if title is in article
-                elif title.lower() in unidecode(articletext):
+                elif unidecode(title.lower()) in unidecode(articletext):
                     print('Submission has the correct title. (', submission.author.name, ') ')
                 # Reports for submissions, with wrong titles, that are at greater than +50- this is important when recovering from a downtime so we don't accidentally pull from /r/all or something!
                 elif submission.score > IgnoreUpvotedScore:
