@@ -1,5 +1,5 @@
 # -------------------------------------------- #
-# NotTheOnionBot 4.2                           #
+# NotTheOnionBot 4.3                           #
 # By /u/x_minus_one                            #
 # https://github.com/xminusone/nottheonion-bot #
 # -------------------------------------------- #
@@ -23,12 +23,12 @@ from time import localtime, timezone
 from unidecode import unidecode
 
 # Startup Console Text
-print('NotTheOnionBot is starting up - v4.2')
+print('NotTheOnionBot is starting up - v4.3')
 print('Sadly, this is NotTheOnionBot.')
 print(' ')
 
-r = praw.Reddit(client_id='CLIENT ID',
-                     client_secret='CLIENT SECRET',
+r = praw.Reddit(client_id='ID',
+                     client_secret='SECRET',
                      password='PASSWORD',
                      user_agent='NotTheOnionBot by /u/x_minus_one',
                      username='NotTheOnionBot')
@@ -168,10 +168,10 @@ def titleCheckBot():
                 # Removals for submissions that have the wrong title
                 else:
                     print('Submission has wrong title.  Removing and assigning flair...')
-                    submission.remove()
-                    submission.set_flair(flair_text='Wrong/Altered Title', flair_css_class='removed')
+                    submission.mod.remove()
+                    submission.mod.flair(text='Wrong/Altered Title', css_class='removed')
                     print('Done, commenting...')
-                    submission.add_comment(getRemovalComment()).distinguish()
+                    submission.reply(getRemovalComment()).mod.distinguish(how='yes', sticky=False)
                     print('All done! (', submission.author.name, ')')
         except:
             print("Error! Reddit failed to grab a submission or the user deleted it during the cycle. Skipping...")
