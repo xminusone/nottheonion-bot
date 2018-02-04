@@ -1,5 +1,5 @@
 # -------------------------------------------- #
-# NotTheOnionBot 4.1                           #
+# NotTheOnionBot 4.2                           #
 # By /u/x_minus_one                            #
 # https://github.com/xminusone/nottheonion-bot #
 # -------------------------------------------- #
@@ -23,14 +23,16 @@ from time import localtime, timezone
 from unidecode import unidecode
 
 # Startup Console Text
-print('NotTheOnionBot is starting up - v4.0')
+print('NotTheOnionBot is starting up - v4.2')
 print('Sadly, this is NotTheOnionBot.')
 print(' ')
 
-r = praw.Reddit(user_agent="NotTheOnionBot v4.0 by /u/x_minus_one")
+r = praw.Reddit(client_id='CLIENT ID',
+                     client_secret='CLIENT SECRET',
+                     password='PASSWORD',
+                     user_agent='NotTheOnionBot by /u/x_minus_one',
+                     username='NotTheOnionBot')
 print('Logging in to reddit...')
-o = OAuth2Util.OAuth2Util(r, print_log=True)
-o.refresh()
 print("Done!")
 
 # Submission Limit for TitleCheckBot
@@ -111,7 +113,7 @@ print(' ')
 # SHARED INFO #
 # (this should be set to "mod" unless you don't want the main sub checked
 #  for testing reasons)
-rmod = r.get_subreddit("mod")
+rmod = r.subreddit("mod")
 
 # Karma score considered "significant" for approval purposes
 # Should be set to one less than the real score because of using greater than
@@ -144,7 +146,7 @@ def getArticleText(url):
 def titleCheckBot():
     print('Starting TitleCheckBot cycle.')
     printCurrentTime()
-    for submission in rmod.get_unmoderated(limit=titles_limit):
+    for submission in rmod.mod.unmoderated(limit=titles_limit):
         title = submission.title
         articletext = getArticleText(submission.url)
         exemptcheckurl = submission.url
@@ -183,7 +185,7 @@ def deadPostsBot():
     print('Updating current time...')
     now = datetime.datetime.now(datetime.timezone.utc).timestamp()
     print('Checking age of posts in /r/mod...')
-    for submission in rmod.get_unmoderated(limit=approvals_limit):
+    for submission in rmod.mod.unmoderated(limit=approvals_limit):
         try:
             age = now - submission.created_utc
             if age < 86400: # Skips posts that are less than 24hrs old
@@ -217,7 +219,7 @@ def karmaTrainBot():
   print("DEBUG: It's @%s." % cycleBeats)
   print('Cycle started at %s' % cycleBeats)
   print('Grabbing unmoderated posts...')
-  for submission in rmod.get_unmoderated(limit=alerts_limit):
+  for submission in rmod.mod.unmoderated(limit=alerts_limit):
     try:
         if len(submission.mod_reports) > 0:
             print('Submission has a mod report, continuing. (', submission.author.name, ')')
@@ -247,7 +249,6 @@ def karmaTrainBot():
 
 while True:
   try:
-    o.refresh()
     titleCheckBot()
     print('TitleCheckBot cycle completed.')
     print(' ')
